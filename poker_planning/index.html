@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Planning</title>
+    <style>
+       .reveal{
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           margin-top: 10%;
+           padding: 50px;
+       }
+       .reveal button{
+           height: 50px;
+           width: 100px;
+       }
+       .reveal img{
+           position: fixed;
+           margin-top: 60px;
+           
+       }
+       .reveal h2{
+          
+           z-index: 5;
+       }
+       .cards{
+           display: flex;
+
+           justify-content: center;
+           gap: 1rem;
+           margin-top: 100px;
+       }
+       .cards button{
+           width: 50px;
+           height: 50px;
+           background-color: grey;
+       }
+       .cards button:hover{
+           margin-top: -10px;
+           opacity: 0.7;
+       }
+       
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <button id ="reveal" disabled="true">Pick your card</button>
+        <h2>?</h2>
+        <img src="card.png" alt="">
+    </div>
+    <div class="cards">
+        <button id="0">0</button>
+        <button id="1">1</button>
+        <button id="2">2</button>
+        <button id="3">3</button>
+        <button id="5">5</button>
+        <button id="8">8</button>
+        <button id="13">13</button>
+        <button id="21">21</button>
+        <button id="34">34</button>
+        <button id="55">55</button>
+    </div>
+    <script>
+        const selectedCard = document.querySelector(".reveal h2");
+        var buttons = document.querySelectorAll(".cards button");
+        const reveal = document.getElementById("reveal");
+        for(var i = 0;i<buttons.length;i++){
+            buttons[i].addEventListener('click',function onClick(){
+                if(selectedCard.textContent != this.id){
+                    selectedCard.textContent = this.id;
+                    reveal.disabled = false;
+                    reveal.textContent = "Reveal Cards";
+                }else{
+                    selectedCard.textContent = "?";
+                    reveal.disabled = true;
+                    reveal.textContent = "Pick your card";
+                }
+            });
+
+            
+        }
+       
+    </script>
+</body>
+</html>
