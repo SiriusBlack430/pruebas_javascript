@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><%= title %></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
     <style>
         input{
             margin: 20px;
@@ -13,24 +14,23 @@
         }
     </style>
 </head>
-
 <body>
-    <form action="/loggedin" method="POST">
+    <form action="/registered" method="POST">
         <div>
-            <h2>LOGIN</h2>
+            <h2>Register</h2>
             <label for="username"></label>
             <input type="text" name="username"  id="username" placeholder="Username">
             <br>
             <label for="password"></label>
             <input type="password" name="password" id="password" placeholder="Password">
             <br>
-            <button type="submit">Entrar</button>
-            <% if(notLogin){ %>
-                <div><%= notLogin %></div>
-            <% } %>
+            <label for="confirmPassword"></label>
+            <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password">
+            <br>
+            <button type="submit">Register</button>
+
         </div>
 
     </form>
-    
 </body>
 </html>
