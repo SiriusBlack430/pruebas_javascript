@@ -5,32 +5,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
-    <style>
-        input{
-            margin: 20px;
-        }
-        button{
-            margin-left: 20px;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
 </head>
 <body>
-    <form action="/registered" method="POST">
-        <div>
-            <h2>Register</h2>
-            <label for="username"></label>
-            <input type="text" name="username"  id="username" placeholder="Username">
-            <br>
-            <label for="password"></label>
-            <input type="password" name="password" id="password" placeholder="Password">
-            <br>
-            <label for="confirmPassword"></label>
-            <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password">
-            <br>
-            <button type="submit">Register</button>
-
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h2 class=".fw-bold text-center py-5">REGISTER</h2>
+                <form action="/registered" method="POST">
+                    <div class="mb-4">
+                        <label for="username" class="form-label"></label>
+                        <input type="text" class="form-control"name="username"  id="username" placeholder="Enter username">
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label"></label>
+                        <input type="password"  class="form-control" name="password" id="password" placeholder="Enter password">
+                    </div>
+                    <div class="mb-4">
+                        <label for="confirmPassword" class="form-label"></label>
+                        <input type="password"  class="form-control" name="confirmPassword" id="confirmPassword" placeholder="Confirm password">
+                    </div>
+                       
+                     <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                     </div>
+            
+            
+                </form>
+            </div>
         </div>
-
-    </form>
+    </div>
+    
 </body>
 </html>

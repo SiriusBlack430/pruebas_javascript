@@ -39,7 +39,7 @@ pool.getConnection((err)=>{
 // pagina para logear
 router.get('/log',(req, res)=>{
     req.session.destroy();
-    res.render('log',{title : "LOGIN" , notLogin: false})
+    res.render('log',{title : "LOGIN" , notCorrect: false})
     
 })
 // pagina de index
@@ -71,17 +71,33 @@ router.post('/registered', async (req, res)=>{
     if(!data.username || !data.password || !data.confirmPassword){
         res.send('No puede haber campos vacios <a href="register">VOLVER</a>');
     }else{
-        
-        const User = await pool.query("SELECT * FROM user WHERE username='" + pool.escape(data.username) + "'");
-        if(User.length !==0){
-            res.send("Usuario ya existe en la base de datos <a href='register'>Volver</a>")
-        }else{
-            if(data.password == data.confirmPassword){
-                
+        try{
+            const User = await pool.query("SELECT * FROM USER WHERE username=" + pool.escape(data.username));
+            if(User.length !==0){
+                res.send("Usuario ya existe en la base de datos <a href='register'>Volver</a>")
             }else{
-                res.send("Contraseñas no coinciden <a href='register'>Volver</a>");
+                if(data.password == data.confirmPassword){
+                    const hashedPassword = await bcrypt.hash(data.password,saltRounds);
+                    const userValues = {
+                        username : data.username,
+                        password : hashedPassword,
+                        permiss : "USER"
+                    }
+                    await pool.query("INSERT INTO USER SET ? ",userValues,function(e,result){
+                        if(e){
+                            res.send("ERROR REGISTRANDO")
+                        }
+                        res.render("registered Correctly",{title: "REGISTERED"});
+
+                    });
+                }else{
+                    res.send("Contraseñas no coinciden <a href='register'>Volver</a>");
+                }
             }
+        }catch(e){
+            console.log(e)
         }
+        
     }
 })
 
@@ -89,55 +105,26 @@ router.post('/registered', async (req, res)=>{
 router.post('/loggedin', async function(req, res){
     var data = req.body;
     if(!data.username || !data.password){
-        res.send("Introduzca datos <a href='log'>VOLVER</a>")
+        res.render('log');
     }else{
         const User = await pool.query("SELECT * FROM user WHERE username='" + data.username + "'");
 
         if(User.length==0){
-            res.redirect(307,'/log')
+            res.render('log',{ notCorrect: true, title: "LOGIN"});
             //res.send("Usuario no existe en la base de  datos <a href='log'>Volver</a>")
         }else{
-            
             
             const compare = await bcrypt.compare(data.password,User[0].password);
             if(compare){
                
                 req.session.permiss = User[0].permiss;
 
-                res.render('loggedin',{ desc : "LOGOUT from "+User[0].permiss, title: "LOGGED."})
+                res.render('loggedin',{ permiss : User[0].permiss, title: "LOGGED."})
             }else{
                 res.send("Contraseña incorrecta  <a href='log'>Volver</a>")
-            }
-                    
+            }  
 
         }
-        
-       // var hashedPassword = "SELECT password FROM user WHERE username='"+req.session.user+"'";
-        //var verified = bcrypt.compareSync(data.password,saltRounds);
-        //bcrypt.compare(data.password,)
-
-/*         console.log("prequery")
-        var infoUser = pool.query(select ,(err,result)=>{
-            console.log("respuesta bbdd")
-            if(err){
-                console.log("No existe este usuario")
-            }
-            if(result.length==1){
-                
-                if(result[0].permiss=="ADMIN"){
-                    req.session.admin = true;
-                }
-                res.render('loggedin',{ desc : "LOGOUT from "+result[0].permiss, title: "LOGGED."})
-            }else{
-                res.send("Usurio y/o contraseña incorrecto <a href='log'>Volver</a>")
-            }
-
-
-        })
-        setTimeout( () => {
-            console.log(infoUser)
-
-        }, 2000) */
     }
     
 })
