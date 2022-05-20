@@ -57,14 +57,14 @@ router.get('/contact', auth, (req, res)=>{
 });
 
 router.get('/userList', authAdmin, async (req, res)=>{
-    var User = await pool.query("SELECT USERNAME,PERMISS FROM USER");
+    var User = await pool.query("SELECT * FROM USER");
 
     res.render("userList",{ user : User});
 
 });
 
 router.get('/register',(req, res)=>{
-    res.render("register");
+    res.render("register",{title: "REGISTER",userNotCorrect:false,passNotMatch: false});
 })
 router.post('/registered', async (req, res)=>{
     var data = req.body;
@@ -74,7 +74,7 @@ router.post('/registered', async (req, res)=>{
         try{
             const User = await pool.query("SELECT * FROM USER WHERE username=" + pool.escape(data.username));
             if(User.length !==0){
-                res.send("Usuario ya existe en la base de datos <a href='register'>Volver</a>")
+                res.render("register",{title: "REGISTER", userNotCorrect: true,passNotMatch:false})
             }else{
                 if(data.password == data.confirmPassword){
                     const hashedPassword = await bcrypt.hash(data.password,saltRounds);
@@ -87,11 +87,11 @@ router.post('/registered', async (req, res)=>{
                         if(e){
                             res.send("ERROR REGISTRANDO")
                         }
-                        res.render("registered Correctly",{title: "REGISTERED"});
+                        res.render("registered",{title: "REGISTERED",userNotCorrect:false,passNotMatch:false});
 
                     });
                 }else{
-                    res.send("Contraseñas no coinciden <a href='register'>Volver</a>");
+                    res.render('register',{title:"REGISTER",userNotCorrect:false,passNotMatch:true});
                 }
             }
         }catch(e){
@@ -105,32 +105,28 @@ router.post('/registered', async (req, res)=>{
 router.post('/loggedin', async function(req, res){
     var data = req.body;
     if(!data.username || !data.password){
-        res.render('log');
+        res.send('No puede haber campos vacios <a href="log">VOLVER</a>');
     }else{
-        const User = await pool.query("SELECT * FROM user WHERE username='" + data.username + "'");
+
+        const User = await pool.query("SELECT * FROM USER WHERE username='" + data.username + "'");
 
         if(User.length==0){
             res.render('log',{ notCorrect: true, title: "LOGIN"});
-            //res.send("Usuario no existe en la base de  datos <a href='log'>Volver</a>")
         }else{
             
             const compare = await bcrypt.compare(data.password,User[0].password);
             if(compare){
-               
+            
                 req.session.permiss = User[0].permiss;
 
                 res.render('loggedin',{ permiss : User[0].permiss, title: "LOGGED."})
             }else{
-                res.send("Contraseña incorrecta  <a href='log'>Volver</a>")
+                res.render('log',{ notCorrect: true, title: "LOGIN"});
             }  
-
         }
     }
     
 })
-
-
-
 
 
 module.exports = router; // exporta los datos de router
