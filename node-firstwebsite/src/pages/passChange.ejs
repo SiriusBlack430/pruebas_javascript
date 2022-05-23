@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambio contraseña</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <div class="container">    
+        <div class="row">
+            <div class="col">           
+                 <form action="/userList/edit?id=<%= user.id%>" method="POST">
+                    <% if(actual){ %>
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <strong>Password not correct</strong> 
+                        </div>
+                    <% } %>
+                     <div class="mb-4">
+                         <label for="actualPass" class="form-label">Contraseña actual:</label>
+                         <input class="form-control" type="password" name="actualPass" required>
+                     
+                     </div>
+                     <% if(passNotMatch){ %>
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <strong>Password doesn't match</strong> 
+                        </div>
+                    <% } %>
+                     <div class="mb-4">
+                         <label for="newPass" class="form-label">Nueva contraseña:</label>
+                         <input class="form-control" type="password" name="newPass" required>
+                     </div>
+                     <div class="mb-4">
+                        <label for="ConfirmNewPass" class="form-label">Confirma nueva contraseña:</label>
+                        <input class="form-control" type="password" name="ConfirmNewPass" required>
+                    </div>
+                     
+                     <div class="d-grid">
+                         <button type="submit" class="btn btn-primary">Cambiar contraseña</button>
+                     </div>
+                    
+                 </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
