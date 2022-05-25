@@ -5,8 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poker Planning</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
-       .reveal{
+      /* .reveal{
            display: flex;
            flex-direction: column;
            align-items: center;
@@ -41,49 +44,150 @@
        .cards button:hover{
            margin-top: -10px;
            opacity: 0.7;
-       }
+       }*/
        
     </style>
 </head>
 <body>
-    <div class="reveal">
-        <button id ="reveal" disabled="true">Pick your card</button>
-        <h2>?</h2>
-        <img src="card.png" alt="">
-    </div>
-    <div class="cards">
-        <button id="0">0</button>
-        <button id="1">1</button>
-        <button id="2">2</button>
-        <button id="3">3</button>
-        <button id="5">5</button>
-        <button id="8">8</button>
-        <button id="13">13</button>
-        <button id="21">21</button>
-        <button id="34">34</button>
-        <button id="55">55</button>
-    </div>
-    <script>
-        const selectedCard = document.querySelector(".reveal h2");
-        var buttons = document.querySelectorAll(".cards button");
-        const reveal = document.getElementById("reveal");
-        for(var i = 0;i<buttons.length;i++){
-            buttons[i].addEventListener('click',function onClick(){
-                if(selectedCard.textContent != this.id){
-                    selectedCard.textContent = this.id;
-                    reveal.disabled = false;
-                    reveal.textContent = "Reveal Cards";
+    <img src="logo_gps.jpg" style="position: absolute; top:10px;left:10px;" alt="">
+        <nav class="p-3"> 
+            <ul class="nav justify-content-end">
+                <li class="nav-item">
+                    <a class="nav-link text-success" aria-current="page" href="#">Salir</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-success" href="" data-bs-toggle="offcanvas" data-bs-target="#canvasJugadores" aria-controls="canvasJugadores">
+                        Jugadores
+                    </a>
+                        <div class="offcanvas offcanvas-end"  data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="canvasJugadores" aria-labelledby="offcanvasExampleLabel">
+                            <div class="offcanvas-header">
+                                <h5 class="offcanvas-title" id="offcanvasExampleLabel">Jugadores</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                            </div>
+                            <div class="offcanvas-body">
+                                <p>Lista de jugadores actuales</p>
+                            </div>
+                        </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-success" data-bs-toggle="modal" data-bs-target="#invitar" href="#">Invitar</a>
+                    <div class="modal fade" id="invitar" tabindex="-1" aria-labelledby="invitarUsuario" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="invitarUsuario">Invitar usuario</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Buscador de usuarios para invitar
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-success" data-bs-dismiss="modal">Invitar</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#canvasIssue" aria-controls="canvasIssue">
+                        Issues
+                    </button>
+                        <div class="offcanvas offcanvas-start" tabindex="-1" id="canvasIssue" aria-labelledby="offcanvasExampleLabel">
+                            <div class="offcanvas-header">
+                                <h5 class="offcanvas-title" id="offcanvasExampleLabel">Issues from repository X</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                            </div>
+                            <div class="offcanvas-body">
+                                <div class="input-group mb-3">
+                                    <div class="form-intline">
+                                        <input type="search" id="form1" class="form-control" />                            
+                                    </div>
+                                    <button type="button" class="btn btn-success">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                                      </svg>
+                                    </button>
+                                </div>
+                                <div class="card mb-3" style="width: 18rem;">    
+                                    <div class="card-body">
+                                      <h5 class="card-title">Issue 1</h5>
+                                      <p class="card-text">Small description</p>
+                                      <a href="#" class="btn btn-success">Vote this</a>
+                                    </div>
+                                </div>
+                                <div class="card mb-3" style="width: 18rem;"> 
+                                    <div class="card-body">
+                                      <h5 class="card-title">Issue 2</h5>
+                                      <p class="card-text">small description</p>
+                                      <a href="#" class="btn btn-success">Vote this</a>
+                                    </div>
+                                  </div>
+                            
+                            </div>
+                        </div>
+                </li>
+              </ul>
+        </nav>
+        <div class="container">
+            <div class="row">
+                
+                <div class="col p-3 text-center fs-1">
+                    Issue Num X
+                </div>
+                
+            </div>
+            <div class="row" style="height: 200px;">
+                <div class="col text-center">
+                    <div class="reveal p-5">
+                        <button class="btn btn-success" id ="reveal" disabled="true">Pick your card</button>
+                        <h2 class="p-3">?</h2>
+                        
+                    </div>
+                   
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                    <div class="cards  btn.group p-5">
+                        <button class="btn btn-success p-3 m-2" id="0">0</button> 
+                        <button class="btn btn-success p-3 m-2" id="1">1</button>
+                        <button class="btn btn-success p-3 m-2" id="2">2</button>
+                        <button class="btn btn-success p-3 m-2" id="3">3</button>
+                        <button class="btn btn-success p-3 m-2" id="5">5</button>
+                        <button class="btn btn-success p-3 m-2" id="8">8</button>
+                        <button class="btn btn-success p-3 m-2" id="13">13</button>
+                        <button class="btn btn-success p-3 m-2" id="21">21</button>
+                        <button class="btn btn-success p-3 m-2" id="34">34</button>
+                        <button class="btn btn-success p-3 m-2" id="55">55</button>
+                        <script>
+                            const selectedCard = document.querySelector(".reveal h2");
+                            var buttons = document.querySelectorAll(".cards button");
+                            const reveal = document.getElementById("reveal");
+                            for(var i = 0;i<buttons.length;i++){
+                                buttons[i].addEventListener('click',function onClick(){
+                                    if(selectedCard.textContent != this.id){
+                                        selectedCard.textContent = this.id;
+                                        reveal.disabled = false;
+                                        reveal.textContent = "Reveal Cards";
+                    
+                                    }else{
+                                        selectedCard.textContent = "?";
+                                        reveal.disabled = true;
+                                        reveal.textContent = "Pick your card";
+                                    }
+                                });
+                                
+                            }
+                           
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                }else{
-                    selectedCard.textContent = "?";
-                    reveal.disabled = true;
-                    reveal.textContent = "Pick your card";
-                }
-            });
+                
+           
 
-            
-        }
-       
-    </script>
+
 </body>
 </html>
