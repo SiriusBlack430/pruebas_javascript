@@ -9,7 +9,6 @@ var auth = function(req, res, next) {
     if (req.session && req.session.permiss){
         
        return next();
-
         
     }else{
         return res.sendStatus(401);
@@ -21,8 +20,7 @@ var authAdmin = function(req, res, next) {
     if (req.session && req.session.permiss && req.session.permiss=='ADMIN'){
         
        return next();
-
-        
+     
     }else{
         return res.sendStatus(401);
     }
@@ -39,11 +37,13 @@ pool.getConnection((err)=>{
 // pagina para logear
 router.get('/log',(req, res)=>{
     req.session.destroy();
+
     res.render('log',{title : "LOGIN" , notCorrect: false})
     
 })
 // pagina de index
 router.get('/', (req, res)=>{
+    
     res.render('index', { title : "First Website"});
 });
 // pagina de contact
@@ -72,21 +72,19 @@ router.post('/registered', async (req, res)=>{
         res.send('No puede haber campos vacios <a href="register">VOLVER</a>');
     }else{
         try{
-            const User = await pool.query("SELECT * FROM USER WHERE username=" + pool.escape(data.username));
+            const User = await pool.query("SELECT * FROM USER WHERE username= ?",data.username);
             if(User.length !==0){
                 res.render("register",{title: "REGISTER", userNotCorrect: true,passNotMatch:false})
             }else{
                 if(data.password == data.confirmPassword){
                     const hashedPassword = await bcrypt.hash(data.password,saltRounds);
-                    const userValues = {
-                        username : data.username,
-                        password : hashedPassword,
-                        permiss : "USER"
-                    }
-                    await pool.query("INSERT INTO USER SET ? ",userValues,function(e,result){
+                    const num = await pool.query("SELECT MAX(id) as id FROM USER");
+                    await pool.query("ALTER TABLE USER AUTO_INCREMENT = ?",num[0].id);
+                    await pool.query("INSERT INTO USER(username,password,permiss) VALUES(?,?,?)",[data.username,hashedPassword,"USER"],function(e,result){
                         if(e){
                             res.send("ERROR REGISTRANDO")
                         }
+
                         res.render("registered",{title: "REGISTERED",userNotCorrect:false,passNotMatch:false});
 
                     });
@@ -108,7 +106,7 @@ router.post('/loggedin', async function(req, res){
         res.send('No puede haber campos vacios <a href="log">VOLVER</a>');
     }else{
 
-        const User = await pool.query("SELECT * FROM USER WHERE username='" + data.username + "'");
+        const User = await pool.query("SELECT * FROM USER WHERE username= ?",data.username);
 
         if(User.length==0){
             res.render('log',{ notCorrect: true, title: "LOGIN"});
@@ -130,11 +128,12 @@ router.post('/loggedin', async function(req, res){
 
 router.get('/userList/delete', async (req,res)=>{
     const id = req.query.id;
-    var User = await pool.query("SELECT permiss FROM USER WHERE id="+id);
-
+    var User = await pool.query("SELECT permiss FROM USER WHERE id= ?",id);
+    console.log(User)
     if(User){
         if(User[0].permiss != "ADMIN"){
-           await pool.query("DELETE FROM USER WHERE id=" + id);
+           await pool.query("DELETE FROM USER WHERE id= ?", id);
+
         }
       
     }else{
@@ -146,9 +145,12 @@ router.get('/userList/delete', async (req,res)=>{
 })
 router.get('/userList/edit', async (req,res)=>{
     const id = req.query.id;
-    var User = await pool.query("SELECT id,username,permiss FROM USER WHERE id="+id);
- 
-    res.render('edit',{user: User[0]});
+    var User = await pool.query("SELECT id,username,permiss FROM USER WHERE id= ?",id);
+    if(User.length!=0){
+        res.render('edit',{user: User[0]});
+        return
+    }
+    res.redirect('/userList')
    
 
 })
@@ -156,13 +158,13 @@ router.get('/userList/edit', async (req,res)=>{
 router.post('/userList',authAdmin, async(req,res)=>{
     const id = req.query.id;
     var data = req.body;
-    await pool.query("UPDATE USER Set username ='" + data.username +"' ,permiss ='" + data.privileges + "' WHERE id=" + id);
+    await pool.query("UPDATE USER Set username = ? ,permiss = ? WHERE id= ?", [data.username,data.privileges,id]);
     res.redirect("/userList");
 })
 
 router.get('/userList/edit/passChange' , async(req,res)=>{
     const id = req.query.id;
-    var User = await pool.query("SELECT id,username,permiss FROM USER WHERE id=" + id);
+    var User = await pool.query("SELECT id,username,permiss FROM USER WHERE id=?", id);
 
     res.render('passChange',{user : User[0],passNotMatch:false,actual:false});
 })
@@ -170,12 +172,12 @@ router.get('/userList/edit/passChange' , async(req,res)=>{
 router.post('/userList/edit', async (req,res)=>{
     const id = req.query.id;
     const data = req.body;
-    const User = await pool.query("SELECT * FROM USER WHERE id="+id);
+    const User = await pool.query("SELECT * FROM USER WHERE id= ?",id);
     const compare = await bcrypt.compare(data.actualPass,User[0].password);
     if(compare){
         if(data.newPass == data.confirmNewPass){
             const hashedPassword = await bcrypt.hash(data.newPassword,saltRounds);
-            await pool.query("UPDATE USER Set password ='" + hashedPassword +"' WHERE id=" + id);
+            await pool.query("UPDATE USER Set password = ? WHERE id= ?",[hashedPassword, id]);
             res.redirect('/userList/edit');
         }else{
             res.render('passChange',{user : User[0],passNotMatch:true,actual:false});
@@ -185,6 +187,5 @@ router.post('/userList/edit', async (req,res)=>{
     res.render('passChange',{user: User[0],passNotMatch:false,actual : true})
 
 })
-
 
 module.exports = router; // exporta los datos de router
