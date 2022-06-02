@@ -1,5 +1,4 @@
 const express = require('express');
-const { route } = require('./issue');
 const router = express.Router();
 const user = require("./user");
 const issue = require("./issue");

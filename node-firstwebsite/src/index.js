@@ -1,11 +1,9 @@
 const express = require("express");
 const session = require("express-session");// gestionar sessions
 const cookieParser = require("cookie-parser"); // cookies
-const app = express(); // servidor
 const path = require('path'); // modulo para path
 const morgan = require('morgan'); // mensajes de peticiones http
-
-
+const app = express(); // servidor
 
 app.use(cookieParser());
 app.use( session({ // session para la app con sus atributos
@@ -31,6 +29,10 @@ app.use(express.urlencoded({extended: false}));
 app.use("/", require("./routes"));
 
 
-app.listen(app.get('port'), ()=>{
 
-});
+function startServer(){
+  app.listen(app.get('port'), ()=>{
+    console.log("Server Started")
+  })
+}
+startServer()

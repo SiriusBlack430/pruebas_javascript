@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuracion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h2 class=".fw-bold text-center py-5">Configuracion</h2>
+                <form action="/issue" method="POST">
+                    
+                    <div class="mb-4">
+                        <label for="repository" class="form-label">Repository</label>
+                        <input type="text" class="form-control"name="repository"  id="repository" placeholder="Repository Name" required value="<%= config.name %>">
+                    </div>
+                    <div class="mb-4">
+                        <label for="token" class="form-label">Personal access token</label>
+                        <input type="password"  class="form-control" name="token" id="token" required value="<%= config.token %>">
+                    </div>
+                    <div class="mb-4">
+                        <label for="projectName" class="form-label">Repository project</label>
+                        <input type="text"  class="form-control" name="projectName" id="projectName" placeholder="Project Name" required value="<%= config.projectName %>">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Guardar datos</button>
+                    </div>
+            
+            
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
