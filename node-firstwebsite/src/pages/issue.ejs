@@ -9,13 +9,48 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-  
-    <button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#canvasIssue" aria-controls="canvasIssue">
+    <div class="container">
+      <button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#canvasIssue" aria-controls="canvasIssue">
         Issues
     </button>
     <a href="/configRepos" class="btn btn-success">Config</a>
+    <% if(element.length>0){ %>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Name issue</th>
+            <th scope="col">Status</th>
+            <th scope="col">Label</th>
+            <th scope="col">Url</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          <% for(var i=0;i<element.length;i++){ %>
+            <tr>
+                <td>
+                  <%= element[i].title %>
+                </td>
+                <td>
+                    <%= element[i].status %>
+                </td>
+                <td>
+                  <%= element[i].label %>
+                </td>
+                <td>
+                  <a href="<%= element[i].url %>">link</a>
+              </td>
+            </tr>
+            <% } %>
+        </tbody>
+      </table>
+    <% }else{ %>
+        <p>Revisa tu configuracion</p>
+    <% } %>
+    </div>
+    
       
-  </button>
+  <!--
         <div class="offcanvas offcanvas-start" tabindex="-1" id="canvasIssue" aria-labelledby="offcanvasExampleLabel">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="offcanvasExampleLabel">Issues from repository X</h5>
@@ -48,6 +83,6 @@
                   </div>
             
             </div>
-        </div>
+        </div> -->
 </body>
 </html>
