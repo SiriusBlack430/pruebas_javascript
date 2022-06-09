@@ -6,16 +6,27 @@ const pool = require("./conection");
 var github_data ={}, headers = {};;
 const baseUrl = "https://api.github.com/graphql"; // url api
 
-async function initializeData(){
-  //datos de config
-  const data = await pool.query("SELECT * FROM REPCONFIG");
-  var auth = "bearer " + data[0].token;
-  headers = {
-    "Content-Type":"application/json",
-    Authorization: auth
+var auth = function(req, res, next) {
+  console.log("Session"+ JSON.stringify(req.session))
+  if (req.session && req.session.permiss){
+      
+     return next();
+      
+  }else{
+      return res.sendStatus(401);
   }
-  //obtener id project a partir del nombre del proyecto
+};
+
+async function initializeData(){  
   try{
+    //datos de config
+    const data = await pool.query("SELECT * FROM REPCONFIG");
+    var auth = "bearer " + data[0].token;
+    headers = {
+      "Content-Type":"application/json",
+      Authorization: auth
+    }
+    //obtener id project a partir del nombre del proyecto
     const info = await fetch(baseUrl,{
       method: "POST",
       headers: headers,
@@ -36,11 +47,9 @@ async function initializeData(){
     }
   }catch(e){
     github_data = {}
-    console.log("Configuracion incorrecta")
+    console.log("Configuracion repo incorrecta")
   }
-  
 }
-initializeData()
 // query graphql
 //id project  PN_kwHOBQI_A84ACKFd
 function idProject(username){
@@ -99,14 +108,19 @@ function nameStatusLabelUrl(){
   }
 };
 
-router.get("/configRepos",async(req,res)=>{
+router.get("/configRepos",auth,async(req,res)=>{
   var config = await pool.query("SELECT * from REPCONFIG");
   res.render("configRepos",{config:config[0]})
 })
 router.post("/issue",async (req,res)=>{
   var data = req.body;
   try{
-    await pool.query("UPDATE REPCONFIG SET name= ? , token = ? , projectName = ?",[data.repository,data.token,data.projectName]);
+    var config = await pool.query("SELECT * from REPCONFIG");
+    if(config.length==0){
+      await pool.query("INSERT INTO REPCONFIG VALUES(?,?,?)",[data.repository,data.token,data.projectName]);
+    }else{
+      await pool.query("UPDATE REPCONFIG SET name= ? , token = ? , projectName = ?",[data.repository,data.token,data.projectName]);
+    }
   }catch(e){
     console.log(e);
   }
@@ -115,10 +129,9 @@ router.post("/issue",async (req,res)=>{
   res.redirect("issue")
   
 })
-
-
-router.get("/issue" ,async(req,res)=>{
-  var element =[],cart={}
+router.get("/issue",auth,async(req,res)=>{
+  
+   var element =[],cart={}
   try{
 
     const info = await fetch(baseUrl,{
@@ -160,7 +173,7 @@ router.get("/issue" ,async(req,res)=>{
     res.render("issue",{element})
   }catch(e){
     res.render("issue",{element: {}})
-  }
+  } 
   
 });
 //   auth: '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' 

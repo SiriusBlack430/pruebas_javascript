@@ -30,7 +30,7 @@ CREATE TABLE REPCONFIG(
     token VARCHAR(200),
     projectName VARCHAR(50)
 );
-INSERT INTO REPCONFIG VALUES("SiriusBlack430","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","Prueba_issue")
+INSERT INTO REPCONFIG VALUES("SiriusBlack430","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","Prueba_issue")
 
 */
 

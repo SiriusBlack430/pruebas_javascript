@@ -15,7 +15,7 @@
             <div class="col">
                 <h2 class=".fw-bold text-center py-5">Configuracion</h2>
                 <form action="/issue" method="POST">
-                    
+                    <% if(config){ %>
                     <div class="mb-4">
                         <label for="repository" class="form-label">Repository</label>
                         <input type="text" class="form-control"name="repository"  id="repository" placeholder="Repository Name" required value="<%= config.name %>">
@@ -31,7 +31,23 @@
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">Guardar datos</button>
                     </div>
-            
+                    <% }else{ %>
+                        <div class="mb-4">
+                            <label for="repository" class="form-label">Repository</label>
+                            <input type="text" class="form-control"name="repository"  id="repository" placeholder="Repository Name" required >
+                        </div>
+                        <div class="mb-4">
+                            <label for="token" class="form-label">Personal access token</label>
+                            <input type="password"  class="form-control" name="token" id="token" required >
+                        </div>
+                        <div class="mb-4">
+                            <label for="projectName" class="form-label">Repository project</label>
+                            <input type="text"  class="form-control" name="projectName" id="projectName" placeholder="Project Name" required >
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Guardar datos</button>
+                        </div>
+                     <% } %>   
             
                 </form>
             </div>
