@@ -79,9 +79,9 @@ function nameStatusLabelUrl(){
               settings
             }
           }
-          items(first: 20) {
+          items(first: 100) {
             nodes {
-              fieldValues(first: 8) {
+              fieldValues(first: 100) {
                 nodes {
                   value
                   projectField {
@@ -108,11 +108,13 @@ function nameStatusLabelUrl(){
   }
 };
 
+
+
 router.get("/configRepos",auth,async(req,res)=>{
   var config = await pool.query("SELECT * from REPCONFIG");
   res.render("configRepos",{config:config[0]})
 })
-router.post("/issue",async (req,res)=>{
+router.post("/configRepos",async (req,res)=>{
   var data = req.body;
   try{
     var config = await pool.query("SELECT * from REPCONFIG");
@@ -124,16 +126,27 @@ router.post("/issue",async (req,res)=>{
   }catch(e){
     console.log(e);
   }
-
-  await initializeData()
   res.redirect("issue")
   
 })
 router.get("/issue",auth,async(req,res)=>{
+  try{
+    await initializeData()
+    if(github_data.projectId===undefined){
+      console.log("conexionfailed")
+    }
+    res.render("issue",{element:{}})
+  }catch(e){
+    console.log("Conexion fallida")
+  }
+  
+  
+})
+/* router.get("/issue",auth,async(req,res)=>{
   
    var element =[],cart={}
   try{
-
+    awaitinitializeData()
     const info = await fetch(baseUrl,{
       method: "POST",
       headers: headers,
@@ -164,6 +177,7 @@ router.get("/issue",auth,async(req,res)=>{
           for(var m=0;m<statusOptions.length;m++){
             if(statusOptions[m].id===object[i].fieldValues.nodes[j].value){
               cart.status = statusOptions[m].name;
+              
             }
           }
           element.push({title: cart.title,status: cart.status,url: cart.url,label: cart.label});
@@ -175,6 +189,6 @@ router.get("/issue",auth,async(req,res)=>{
     res.render("issue",{element: {}})
   } 
   
-});
-//   auth: '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' 
+}); */
+//   auth: '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' 
 module.exports = router;
