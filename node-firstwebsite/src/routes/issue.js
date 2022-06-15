@@ -13,6 +13,7 @@ var auth = function(req, res, next) {
       return res.sendStatus(401);
   }
 };
+var busqueda="";
 var github_data ={}, headers = {},element=[],cart={};
 const baseUrl = "https://api.github.com/graphql"; // url api
 
@@ -123,7 +124,6 @@ router.post("/configRepos",async (req,res)=>{
   }catch(e){
     console.log(e);
   }
-
   await initializeData()
   res.redirect("issue")
   
@@ -174,18 +174,20 @@ router.get("/issue",auth,async(req,res)=>{
         }
       }
         
-      res.render("issue",{element})
+      res.render("issue",{element,busqueda})
     }catch(e){
       console.log(e.message)
-      res.render('issue',{element:{}})
+      res.render('issue',{element:{},busqueda})
     }
   }else{
-    res.render('issue',{element})
+    res.render('issue',{element,busqueda})
   }
-  
-  
-  
-
+  var config = await pool.query("SELECT * from REPCONFIG");
+  res.render('issue',{config:config[0]})
 });
 
+router.post("/issue",async (req,res)=>{
+  busqueda = req.body.filtroStatus;
+  res.render('issue',{busqueda,element})
+})
 module.exports = router;
