@@ -3,12 +3,15 @@ const router = express.Router();
 const pool = require("./conection");
 const bcrypt = require ('bcrypt');
 const saltRounds = 10;
+const fetch = require('node-fetch');
+const { render } = require('ejs');
+
 // variable para autenticar usuario y password
 var auth = function(req, res, next) {
     console.log("Session"+ JSON.stringify(req.session))
     if (req.session && req.session.permiss){
         
-       return next();
+        return next();
         
     }else{
         return res.sendStatus(401);
@@ -19,8 +22,8 @@ var authAdmin = function(req, res, next) {
     console.log("Session"+ JSON.stringify(req.session))
     if (req.session && req.session.permiss && req.session.permiss=='ADMIN'){
         
-       return next();
-     
+        return next();
+        
     }else{
         return res.sendStatus(401);
     }
@@ -32,7 +35,7 @@ pool.getConnection((err)=>{
         return;
     }
     console.log("DB connected");
-
+    
 })
 // pagina para logear
 
@@ -45,14 +48,14 @@ router.get('/contact', auth, (req, res)=>{
     }else{
         res.render('contact', { title : "Contact pages for users"});
     }
-
+    
 });
 
 router.get('/userList', authAdmin, async (req, res)=>{
     var User = await pool.query("SELECT id,username,permiss FROM USER");
-
+    
     res.render("userList",{ user : User});
-
+    
 });
 
 
@@ -74,9 +77,9 @@ router.post('/registered', async (req, res)=>{
                         if(e){
                             res.send("ERROR REGISTRANDO")
                         }
-
+                        
                         res.render("registered",{title: "REGISTERED",userNotCorrect:false,passNotMatch:false});
-
+                        
                     });
                 }else{
                     res.render('register',{title:"REGISTER",userNotCorrect:false,passNotMatch:true});
@@ -89,31 +92,26 @@ router.post('/registered', async (req, res)=>{
     }
 })
 
-
 router.post('/loggedin', async function(req, res){
     var data = req.body;
     if(!data.username || !data.password){
         res.send('No puede haber campos vacios <a href="log">VOLVER</a>');
     }else{
-
+        
         const User = await pool.query("SELECT * FROM USER WHERE username= ?",data.username);
-
+        
         if(User.length==0){
             res.render('log',{ notCorrect: true, title: "LOGIN"});
         }else{
-            
             const compare = await bcrypt.compare(data.password,User[0].password);
             if(compare){
-            
                 req.session.permiss = User[0].permiss;
-
                 res.render('loggedin',{ permiss : User[0].permiss, title: "LOGGED."})
             }else{
                 res.render('log',{ notCorrect: true, title: "LOGIN"});
             }  
         }
     }
-    
 })
 
 router.get('/userList/delete', async (req,res)=>{
@@ -122,16 +120,16 @@ router.get('/userList/delete', async (req,res)=>{
     console.log(User)
     if(User){
         if(User[0].permiss != "ADMIN"){
-           await pool.query("DELETE FROM USER WHERE id= ?", id);
-
+            await pool.query("DELETE FROM USER WHERE id= ?", id);
+            
         }
-      
+        
     }else{
-       console.log("NO ENCONTRADO")
+        console.log("NO ENCONTRADO")
     }
     
     res.redirect("/userList");
-
+    
 })
 router.get('/userList/edit', async (req,res)=>{
     const id = req.query.id;
@@ -141,8 +139,8 @@ router.get('/userList/edit', async (req,res)=>{
         return
     }
     res.redirect('/userList')
-   
-
+    
+    
 })
 //Modificar username y permisos
 router.post('/userList',authAdmin, async(req,res)=>{
@@ -155,7 +153,7 @@ router.post('/userList',authAdmin, async(req,res)=>{
 router.get('/userList/edit/passChange' , async(req,res)=>{
     const id = req.query.id;
     var User = await pool.query("SELECT id,username,permiss FROM USER WHERE id=?", id);
-
+    
     res.render('passChange',{user : User[0],passNotMatch:false,actual:false});
 })
 //Cambiar contraseña
@@ -175,7 +173,7 @@ router.post('/userList/edit', async (req,res)=>{
         }
     }
     res.render('passChange',{user: User[0],passNotMatch:false,actual : true})
-
+    
 })
 
 module.exports = router; // exporta los datos de router
