@@ -13,8 +13,7 @@ var auth = function(req, res, next) {
     return res.sendStatus(401);
   }
 };
-var busqueda="";
-var github_data ={}, headers = {},element=[],cart={};
+var github_data ={}, headers = {},element=[],cart={}, busqueda="";
 const baseUrl = "https://api.github.com/graphql"; // url api
 
 async function initializeData(){
@@ -132,7 +131,7 @@ router.post("/configRepos",async (req,res)=>{
 })
 
 router.get("/issue",auth,async(req,res)=>{
-  await initializeData()
+  await initializeData();
   if(element.length==0){
     try{
       const info = await fetch(baseUrl,{
