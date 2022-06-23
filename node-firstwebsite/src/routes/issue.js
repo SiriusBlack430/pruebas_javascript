@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
+const { config } = require('./conection');
 const pool = require("./conection");
 
 var auth = function(req, res, next) {
   console.log("Session"+ JSON.stringify(req.session))
   if (req.session && req.session.permiss){
       
-     return next();
-      
+     return next(); 
   }else{
       return res.sendStatus(401);
   }
@@ -119,20 +119,24 @@ router.get("/configRepos",auth,async(req,res)=>{
 router.post("/configRepos",async (req,res)=>{
   var data = req.body;
   try{
-    await pool.query("UPDATE REPCONFIG SET name= ? , token = ? , projectName = ?",[data.repository,data.token,data.projectName]);
+    if(config.length==0){
+      await pool.query("INSERT INTO REPCONFIG VALUES(?,?,?)",[data.repository,data.token,data.projectName]);
+    }else{
+      await pool.query("UPDATE REPCONFIG SET name= ? , token = ? , projectName = ?",[data.repository,data.token,data.projectName]);
+    }
   }catch(e){
     console.log(e);
   }
+  element=[],cart={};
 
-  await initializeData()
   res.redirect("issue")
   
-})
-
+})//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
 
 router.get("/issue",auth,async(req,res)=>{
 
   if(element.length==0){
+    await initializeData()
     try{
       const info = await fetch(baseUrl,{
         method: "POST",
@@ -182,10 +186,6 @@ router.get("/issue",auth,async(req,res)=>{
   }else{
     res.render('issue',{element})
   }
-  
-  
-  
-
 });
 
 module.exports = router;

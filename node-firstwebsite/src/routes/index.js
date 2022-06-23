@@ -15,6 +15,7 @@ router.get('/log',(req, res)=>{
 router.get('/register',(req, res)=>{
     res.render("register",{title: "REGISTER",userNotCorrect:false,passNotMatch: false});
 })
+
 router.use(user);
 router.use(issue);
 module.exports = router;
