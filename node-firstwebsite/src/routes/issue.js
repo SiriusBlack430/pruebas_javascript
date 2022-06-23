@@ -6,14 +6,14 @@ const pool = require("./conection");
 var auth = function(req, res, next) {
   console.log("Session"+ JSON.stringify(req.session))
   if (req.session && req.session.permiss){
-      
-     return next();
-      
+    
+    return next();
+    
   }else{
-      return res.sendStatus(401);
+    return res.sendStatus(401);
   }
 };
-var github_data ={}, headers = {},element=[],cart={};
+var github_data ={}, headers = {},element=[],cart={}, busqueda="";
 const baseUrl = "https://api.github.com/graphql"; // url api
 
 async function initializeData(){
@@ -53,67 +53,70 @@ async function initializeData(){
 }
 
 // query graphql
-//id project  PN_kwHOBQI_A84ACKFd
+// username SiriusBlack430
 function idProject(username){
- return {
-  "query":`
-  query{
-    user(login:"`+ username+`") {
-      projectsNext(first:20) {
-        nodes{
-          id
-          title
-        }    
+  return {
+    "query":`
+    query{
+      user(login:"`+ username+`") {
+        projectsNext(first:20) {
+          nodes{
+            id
+            title
+          }    
+        }
       }
-    }
-  }`,
-};
+    }`,
+  };
 }
+
+//id project  PN_kwHOBQI_A84ACKFd
 function nameStatusLabelUrl(){
   return {"query":`
-    query{
-      node(id: "${github_data.projectId}") {
-        ... on ProjectNext {
-          fields(first: 20) {
-            nodes {
-              id
-              name
-              settings
-            }
+  query{
+    node(id: "${github_data.projectId}") {
+      ... on ProjectNext {
+        fields(first: 20) {
+          nodes {
+            id
+            name
+            settings
           }
-          items(first: 20) {
-            nodes {
-              fieldValues(first: 8) {
-                nodes {
-                  value
-                  projectField {
+        }
+        items(first: 20) {
+          nodes {
+            fieldValues(first: 8) {
+              nodes {
+                value
+                projectField {
+                  name
+                }
+              }
+            }
+            content {
+              __typename
+              ... on Issue {
+                title
+                labels(first: 5) {
+                  nodes {
                     name
                   }
                 }
-              }
-              content {
-                __typename
-                ... on Issue {
-                  title
-                  labels(first: 5) {
-                    nodes {
-                      name
-                    }
-                  }
-                  bodyUrl
-                }
+                bodyUrl
               }
             }
           }
         }
       }
-    }`
-  }
+    }
+  }`
+}
 };
 
 router.get("/configRepos",auth,async(req,res)=>{
   var config = await pool.query("SELECT * from REPCONFIG");
   res.render("configRepos",{config:config[0]})
+  
 })
 
 router.post("/configRepos",async (req,res)=>{
@@ -123,15 +126,12 @@ router.post("/configRepos",async (req,res)=>{
   }catch(e){
     console.log(e);
   }
-
   await initializeData()
   res.redirect("issue")
-  
 })
 
-
 router.get("/issue",auth,async(req,res)=>{
-
+  await initializeData();
   if(element.length==0){
     try{
       const info = await fetch(baseUrl,{
@@ -151,41 +151,41 @@ router.get("/issue",auth,async(req,res)=>{
         delete statusOptions[i].name_html;
       }
       var items = infoJson.data.node.items.nodes;
-  
+      
       for(var i=0;i<items.length;i++){
         
         for(var j=0;j<items[i].fieldValues.nodes.length;j++){
           
-            if(items[i].fieldValues.nodes[j].projectField.name ==="Status" && items[i].content.__typename ==="Issue"){
-              cart.label = "";
-              cart.title = items[i].content.title;
-              cart.url = items[i].content.bodyUrl;
-              for(var o =0;o<items[i].content.labels.nodes.length;o++){
-                cart.label = cart.label +" "+ items[i].content.labels.nodes[o].name;
+          if(items[i].fieldValues.nodes[j].projectField.name ==="Status" && items[i].content.__typename ==="Issue"){
+            cart.label = "";
+            cart.title = items[i].content.title;
+            cart.url = items[i].content.bodyUrl;
+            for(var o =0;o<items[i].content.labels.nodes.length;o++){
+              cart.label = cart.label +" "+ items[i].content.labels.nodes[o].name;
+            }
+            
+            for(var m=0;m<statusOptions.length;m++){
+              if(statusOptions[m].id==items[i].fieldValues.nodes[j].value){
+                cart.status = statusOptions[m].name;
               }
-              
-              for(var m=0;m<statusOptions.length;m++){
-                if(statusOptions[m].id==items[i].fieldValues.nodes[j].value){
-                  cart.status = statusOptions[m].name;
-                }
-              }  
+            }  
             element.push({title: cart.title,status: cart.status,url: cart.url,label: cart.label});
           } 
         }
       }
-        
-      res.render("issue",{element})
+      res.render("issue",{element,busqueda})
     }catch(e){
       console.log(e.message)
-      res.render('issue',{element:{}})
+      res.render('issue',{element,busqueda})
     }
   }else{
-    res.render('issue',{element})
+    res.render('issue',{element,busqueda})
   }
-  
-  
-  
-
 });
+
+router.post("/issue",async (req,res)=>{
+  busqueda = req.body.filtroStatus;
+  res.render('issue',{busqueda,element})
+})
 
 module.exports = router;
