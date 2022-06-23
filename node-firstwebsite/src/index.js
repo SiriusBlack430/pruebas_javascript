@@ -13,7 +13,7 @@ app.use( session({ // session para la app con sus atributos
     permiss: "user"
 }))
 
-app.set('port', 3000); // puerto en el que escucha
+app.set('port', 3001); // puerto en el que escucha
 
 app.set('views', path.join(__dirname, 'pages')); // redefinir donde estas las paginas
 
