@@ -15,7 +15,7 @@
             <div class="col">
                 <h2 class=".fw-bold text-center py-5">Configuracion</h2>
                 <form action="/configRepos" method="POST">
-                    <% if(config){ %>
+                    <% if(locals.config){ %>
                     <div class="mb-4">
                         <label for="repository" class="form-label">Repository</label>
                         <input type="text" class="form-control"name="repository"  id="repository" placeholder="Repository Name" required value="<%= config.name %>">
