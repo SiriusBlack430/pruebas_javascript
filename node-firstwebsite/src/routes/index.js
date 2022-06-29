@@ -10,7 +10,7 @@ router.get('/log',(req, res)=>{
     req.session.destroy();
 
     res.render('log',{title : "LOGIN" , notCorrect: false})
-    
+
 })
 router.get('/register',(req, res)=>{
     res.render("register",{title: "REGISTER",userNotCorrect:false,passNotMatch: false});

@@ -77,6 +77,48 @@ function nameStatusLabelUrl(){
 }
 };
 
+function projectV2(){
+  return{
+    "query":`
+    query{
+      user(login:"SiriusBlack430"){
+        projectV2(number:1){
+          fields(first:20){
+            nodes{
+              ... on ProjectV2SingleSelectField{
+                
+                name
+                options{
+                  name
+                  id
+                }
+              }
+            }
+            
+          }
+          items(first:20){
+            nodes{
+              fieldValues()
+              content{
+                ... on Issue{
+
+                  title
+                  labels(first:5){
+                    nodes{
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`,
+
+  };
+}
+
 async function initializeData(){
   //datos de config
   const data = await pool.query("SELECT * FROM REPCONFIG");
@@ -143,7 +185,18 @@ router.post("/configRepos",async (req,res)=>{
   }
   
 })
-//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
+router.get("/projectv2",async(req,res)=>{
+  await initializeData()
+  const info = await fetch(baseUrl,{
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(projectV2())
+  })
+  const infoJson = await info.json();
+  console.log(infoJson)
+  res.send(infoJson)
+})
+//ghp_nUxhCggtwoD0um      +   rdPTyVLGsDNI8dza3AOu3B
 router.get("/issue",auth,async(req,res)=>{
   
   if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
