@@ -4,7 +4,7 @@ const pool = require("./conection");
 const fetch = require('node-fetch');
 const bcrypt = require ('bcrypt');
 const saltRounds = 10;
-const { render } = require('ejs');
+
 
 // variable para autenticar usuario y password
 var auth = function(req, res, next) {
@@ -51,10 +51,10 @@ router.get('/contact', auth, (req, res)=>{
     
 });
 
-router.get('/userList', authAdmin, async (req, res)=>{
+router.get('/userList', async (req, res)=>{
     var User = await pool.query("SELECT id,username,permiss FROM USER");
-    
-    res.render("userList",{ user : User});
+    res.header("Access-Control-Allow-Origin","http://localhost:3000");
+    res.send({User});
     
 });
 
@@ -92,60 +92,6 @@ router.post('/registered', async (req, res)=>{
     }
 })
 
-var github_data ={}, headers = {},element=[],cart={}, busqueda="";
-const baseUrl = "https://api.github.com/graphql"; // url api
-function idProject(username){
-    return {
-        "query":`
-        query{
-            user(login:"`+ username+`") {
-                projectsNext(first:20) {
-                    nodes{
-                        id
-                        title
-                    }    
-                }
-            }
-        }`,
-    };
-}
-async function initializeData(){
-    //datos de config
-    const data = await pool.query("SELECT * FROM REPCONFIG");
-    var auth = "bearer " + data[0].token;
-    headers = {
-        "Content-Type":"application/json",
-        Authorization: auth
-    }
-    //obtener id project a partir del nombre del proyecto
-    try{
-        const info = await fetch(baseUrl,{
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify(idProject(data[0].name))
-        })
-        var infoJson = await info.json();
-        infoJson = infoJson.data.user.projectsNext.nodes;
-        var projectId;
-        
-        for(let i in infoJson){
-            if(infoJson[i].title == data[0].projectName){
-                projectId = infoJson[i].id;
-            }
-        }
-        github_data = {
-            "token": data[0].token,
-            "username": data[0].name,
-            "projectId": projectId
-        }
-        return github_data
-    }catch(e){
-        github_data = {}
-        console.log(e)
-        console.log("Configuracion incorrecta")
-    }
-}
-
 router.post('/loggedin', async function(req, res){
     var data = req.body;
     if(!data.username || !data.password){
@@ -158,11 +104,10 @@ router.post('/loggedin', async function(req, res){
             res.render('log',{ notCorrect: true, title: "LOGIN"});
         }else{
             const compare = await bcrypt.compare(data.password,User[0].password);
-            if(compare){
-                github_data = await initializeData()
+            if(compare){          
                 req.session.permiss = User[0].permiss;
                 res.render('loggedin',{ permiss : User[0].permiss, title: "LOGGED."})
-                console.log(github_data)
+
             }else{
                 res.render('log',{ notCorrect: true, title: "LOGIN"});
             }  

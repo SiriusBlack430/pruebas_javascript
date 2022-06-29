@@ -14,8 +14,11 @@
       Issues
     </button>
     <a href="/configRepos" class="btn btn-success">Config</a>
+    <% if (!locals.element){ %>
+    <div><h1>Revisa tu configuracion</h1></div>
   </div>
   
+  <% }else{ %>
   <div class="offcanvas offcanvas-start" tabindex="-1" id="canvasIssue" aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="offcanvasExampleLabel">Issues from repository X</h5>
@@ -28,9 +31,11 @@
           <button>Busqueda</button>
         </div>
       </form>
-      <% if(element.length>0){ var existe=false; %>
+      <% if(locals.busqueda && element.length>0){ 
+        var existe=false; %>
         <% for(var i=0;i<element.length;i++){
-          if(element[i].status.toLowerCase()== busqueda.toLowerCase()){ existe=true;%>
+          if(element[i].status.toLowerCase()== busqueda.toLowerCase()){ 
+              existe=true;%>
             <table class="table table-bordered">
               <thead>
                 <tr>
@@ -47,16 +52,16 @@
                   <td> <%= element[i].label %> </td>
                   <td> <a href="<%= element[i].url %>">link</a> </td>
                 </tr>
-                <% }%>
-                <% } if(!existe){%>
-                  <p>Status inexistente</p>
-                  <% } %>
-                </tbody>
-              </table>
-              <% }else{ %>
-                <p>Configura los parametros de tu repositorio</p>
-                <% } %>
-              </div>
-            </div>
-          </body>
-          </html>
+          <% }%>
+        <% } 
+      if(!existe){%>
+        <p>Status inexistente</p>
+      <% } %>
+              </tbody>
+            </table>
+    <% } %>
+    </div>
+  </div>
+  <% } %>
+</body>
+</html>
