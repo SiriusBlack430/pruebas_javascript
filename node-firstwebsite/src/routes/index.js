@@ -12,6 +12,12 @@ router.get('/log',(req, res)=>{
     res.render('log',{title : "LOGIN" , notCorrect: false})
 
 })
+router.post('/log',(req,res)=>{
+    
+    console.log(req.body)
+   
+    res.send("ASDASDASDASDASDS")
+})
 router.get('/register',(req, res)=>{
     res.render("register",{title: "REGISTER",userNotCorrect:false,passNotMatch: false});
 })

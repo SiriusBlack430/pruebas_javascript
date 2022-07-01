@@ -4,7 +4,8 @@ const cookieParser = require("cookie-parser"); // cookies
 const path = require('path'); // modulo para path
 const morgan = require('morgan'); // mensajes de peticiones http
 const app = express(); // servidor
-
+const cors = require('cors');
+app.use(cors())
 app.use(cookieParser());
 app.use( session({ // session para la app con sus atributos
     secret: "SECRET",
@@ -13,6 +14,8 @@ app.use( session({ // session para la app con sus atributos
     permiss: "user"
 }))
 
+
+app.use(express.json());
 app.set('port', 3001); // puerto en el que escucha
 
 app.set('views', path.join(__dirname, 'pages')); // redefinir donde estas las paginas
