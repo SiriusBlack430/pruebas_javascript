@@ -51,7 +51,7 @@ router.get('/contact', auth, (req, res)=>{
     
 });
 
-router.get('/userList', async (req, res)=>{
+router.get('/userList',async (req, res)=>{
     var User = await pool.query("SELECT id,username,permiss FROM USER");
     res.header("Access-Control-Allow-Origin","http://localhost:3000");
     res.send({User});    
