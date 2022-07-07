@@ -86,26 +86,50 @@ function projectV2(){
           fields(first:20){
             nodes{
               ... on ProjectV2SingleSelectField{
-                
                 name
                 options{
                   name
-                  id
                 }
               }
             }
-            
           }
           items(first:20){
             nodes{
-              fieldValues()
+              fieldValues(first: 8) {
+                nodes{
+                  ... on ProjectV2ItemFieldSingleSelectValue{
+                    name
+                  }
+                }
+              }
               content{
                 ... on Issue{
-
+                  __typename
                   title
-                  labels(first:5){
+                  labels(first:20){
                     nodes{
                       name
+                    }
+                  }
+                  bodyUrl
+                  comments{
+                   totalCount
+                  }
+                  assignees(first:20){
+                    nodes{
+                      login
+                    }
+                  }
+                  participants(first:20){
+                    nodes{
+                      login
+                    }
+                  }
+                  projectCards(first:10){
+                    nodes{
+                      column{
+                        name
+                      }
                     }
                   }
                 }
@@ -115,10 +139,8 @@ function projectV2(){
         }
       }
     }`,
-
   };
 }
-
 async function initializeData(){
   //datos de config
   const data = await pool.query("SELECT * FROM REPCONFIG");
@@ -156,7 +178,7 @@ async function initializeData(){
   
 }
 
-router.get("/configRepos",auth,async(req,res)=>{
+router.get("/configRepos",async(req,res)=>{
   var config = await pool.query("SELECT * from REPCONFIG");
   if(config.length>0){
     res.render("configRepos",{config:config[0]})
@@ -185,6 +207,7 @@ router.post("/configRepos",async (req,res)=>{
   }
   
 })
+
 router.get("/projectv2",async(req,res)=>{
   await initializeData()
   const info = await fetch(baseUrl,{
@@ -196,9 +219,10 @@ router.get("/projectv2",async(req,res)=>{
   console.log(infoJson)
   res.send(infoJson)
 })
+
 //ghp_nUxhCggtwoD0um      +   rdPTyVLGsDNI8dza3AOu3B
-router.get("/issue",auth,async(req,res)=>{
-  
+router.get("/issue",async(req,res)=>{
+
   if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
     await initializeData();
   }
@@ -222,6 +246,7 @@ router.get("/issue",auth,async(req,res)=>{
         delete statusOptions[i].name_html;
       }
       var items = infoJson.data.node.items.nodes;
+      console.log(items)
       
       for(var i=0;i<items.length;i++){
         
@@ -253,6 +278,85 @@ router.get("/issue",auth,async(req,res)=>{
   }
 });
 
+router.get("/issue2",async(req,res)=>{
+  if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
+    await initializeData();
+  }
+
+  if(element.length==0){
+    try{
+      const info = await fetch(baseUrl,{
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(projectV2())
+      })
+      const infoJson = await info.json();
+      var fields = infoJson.data.user.projectV2.fields.nodes;
+      var statusNames;
+      for(var i=0;i<fields.length;i++){
+        if(fields[i].name === "Status"){
+          statusNames = fields[i].options
+        }
+      }
+      var items = infoJson.data.user.projectV2.items.nodes;
+      for(var i=0; i<items.length; i++){
+        var statusItem
+        var titleIssue
+        var urlIssue
+        var labels
+        for(var j=0; j<items[i].fieldValues.nodes.length; j++){
+          for(var k=0; k<statusNames.length; k++){
+            if(statusNames[k].name == items[i].fieldValues.nodes[j].name){
+              statusItem = items[i].fieldValues.nodes[j].name
+            }
+          }
+        }
+
+        if(items[i].content.__typename==="Issue"){
+          titleIssue = items[i].content.title
+          urlIssue = items[i].content.bodyUrl
+        }
+        labels = items[i].content.labels
+        // console.log(labels)
+        /* for(var k=0; k<items[i].content.labels.length; k++){
+          console.log("S")
+        } */
+
+      }
+
+    }catch(e){
+      console.log(e.message)
+    }
+  }else{
+  }
+});
+router.get("/lol",async(req,res)=>{
+  if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
+    await initializeData();
+  }
+
+  if(element.length==0){
+    try{
+      const info = await fetch(baseUrl,{
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(projectV2())
+      })
+      const infoJson = await info.json();
+      var fields = infoJson.data.user.projectV2.fields.nodes;
+      var statusNames;
+      for(var i=0;i<fields.length;i++){
+        if(fields[i].name === "Status"){
+          statusNames = fields[i].options
+        }
+      }
+      console.log(statusNames)
+    }catch(e){
+      console.log(e.message)
+    }
+  }else{
+  }
+});
 router.post("/issue",async (req,res)=>{
   busqueda = req.body.filtroStatus;
   res.render('issue',{busqueda,element})
