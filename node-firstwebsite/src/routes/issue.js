@@ -103,8 +103,8 @@ function projectV2(){
                 }
               }
               content{
-                ... on Issue{
                   __typename
+                  ... on Issue{
                   title
                   labels(first:20){
                     nodes{
@@ -123,13 +123,6 @@ function projectV2(){
                   participants(first:20){
                     nodes{
                       login
-                    }
-                  }
-                  projectCards(first:10){
-                    nodes{
-                      column{
-                        name
-                      }
                     }
                   }
                 }
@@ -221,7 +214,7 @@ router.get("/projectv2",async(req,res)=>{
 })
 
 //ghp_nUxhCggtwoD0um      +   rdPTyVLGsDNI8dza3AOu3B
-router.get("/issue",async(req,res)=>{
+/* router.get("/issue",async(req,res)=>{
 
   if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
     await initializeData();
@@ -263,7 +256,7 @@ router.get("/issue",async(req,res)=>{
               if(statusOptions[m].id==items[i].fieldValues.nodes[j].value){
                 cart.status = statusOptions[m].name;
               }
-            }  
+            }
             element.push({title: cart.title,status: cart.status,url: cart.url,label: cart.label});
           } 
         }
@@ -276,9 +269,9 @@ router.get("/issue",async(req,res)=>{
   }else{
     res.render('issue',{element,busqueda})
   }
-});
+}); */
 
-router.get("/issue2",async(req,res)=>{
+router.get("/issue",async(req,res)=>{
   if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
     await initializeData();
   }
@@ -300,63 +293,34 @@ router.get("/issue2",async(req,res)=>{
       }
       var items = infoJson.data.user.projectV2.items.nodes;
       for(var i=0; i<items.length; i++){
-        var statusItem
-        var titleIssue
-        var urlIssue
-        var labels
         for(var j=0; j<items[i].fieldValues.nodes.length; j++){
           for(var k=0; k<statusNames.length; k++){
-            if(statusNames[k].name == items[i].fieldValues.nodes[j].name){
-              statusItem = items[i].fieldValues.nodes[j].name
+            if(statusNames[k].name === items[i].fieldValues.nodes[j].name){
+              cart.status = items[i].fieldValues.nodes[j].name
             }
           }
         }
-
+        cart.label=""
         if(items[i].content.__typename==="Issue"){
-          titleIssue = items[i].content.title
-          urlIssue = items[i].content.bodyUrl
+          cart.title = items[i].content.title
+          cart.url = items[i].content.bodyUrl
+          for(var l=0; l<items[i].content.labels.nodes.length; l++){
+              cart.label = items[i].content.labels.nodes[l].name+" "+cart.label
+          }
         }
-        labels = items[i].content.labels
-        // console.log(labels)
-        /* for(var k=0; k<items[i].content.labels.length; k++){
-          console.log("S")
-        } */
-
+        console.log(cart)
+        element.push({title: cart.title,status: cart.status,url: cart.url,label: cart.label});
       }
-
+      res.render("issue",{element,busqueda})
     }catch(e){
       console.log(e.message)
+      res.render('issue')
     }
   }else{
+    res.render('issue',{element,busqueda})
   }
 });
-router.get("/lol",async(req,res)=>{
-  if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
-    await initializeData();
-  }
 
-  if(element.length==0){
-    try{
-      const info = await fetch(baseUrl,{
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(projectV2())
-      })
-      const infoJson = await info.json();
-      var fields = infoJson.data.user.projectV2.fields.nodes;
-      var statusNames;
-      for(var i=0;i<fields.length;i++){
-        if(fields[i].name === "Status"){
-          statusNames = fields[i].options
-        }
-      }
-      console.log(statusNames)
-    }catch(e){
-      console.log(e.message)
-    }
-  }else{
-  }
-});
 router.post("/issue",async (req,res)=>{
   busqueda = req.body.filtroStatus;
   res.render('issue',{busqueda,element})
