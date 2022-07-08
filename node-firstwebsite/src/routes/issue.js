@@ -308,7 +308,6 @@ router.get("/issue",async(req,res)=>{
               cart.label = items[i].content.labels.nodes[l].name+" "+cart.label
           }
         }
-        console.log(cart)
         element.push({title: cart.title,status: cart.status,url: cart.url,label: cart.label});
       }
       res.render("issue",{element,busqueda})
