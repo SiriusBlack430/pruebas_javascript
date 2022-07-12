@@ -1,19 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
-const { config } = require('./conection');
 const pool = require("./conection");
 
-var auth = function(req, res, next) {
-  console.log("Session"+ JSON.stringify(req.session))
-  if (req.session && req.session.permiss){
-    
-    return next();
-    
-  }else{
-    return res.sendStatus(401);
-  }
-};
 var github_data ={}, headers = {},element=[],cart={}, busqueda="";
 const baseUrl = "https://api.github.com/graphql"; // url api
 // query graphql
@@ -77,12 +66,12 @@ function nameStatusLabelUrl(){
 }
 };
 
-function projectV2(){
+function projectV2(user,project){
   return{
     "query":`
     query{
-      user(login:"SiriusBlack430"){
-        projectV2(number:1){
+      user(login:"`+user+`"){
+        projectV2(number:`+project+`){
           fields(first:20){
             nodes{
               ... on ProjectV2SingleSelectField{
@@ -178,32 +167,33 @@ async function initializeData(){
   
 }
 
-router.get("/configRepos",async(req,res)=>{
-  var config = await pool.query("SELECT * from REPCONFIG");
-  if(config.length>0){
-    res.render("configRepos",{config:config[0]})
-  }else{
-    res.render("configRepos");
-  }
-})
-
 router.post("/configRepos",async (req,res)=>{
   var data = req.body;
-  var config = await pool.query("SELECT * from REPCONFIG");
   try{
-    if(config.length===0){
-      await pool.query("INSERT INTO REPCONFIG VALUES(?,?,?)",[data.repository,data.token,data.projectName]); 
-      await initializeData()     
-    }else{
-      if(config[0].name !== data.repository || config[0].token !== data.token || config[0].projectName !== data.projectName){   
-        await pool.query("UPDATE REPCONFIG SET name= ? , token = ? , projectName = ?",[data.repository,data.token,data.projectName]);
-        busqueda="",element=[]
-        await initializeData()
-      }
+    await pool.query("INSERT INTO REPCONFIG(name,token,project) VALUES(?,?,?)",[data.user,data.token,data.project]);
+    headers = {
+      "Content-Type":"application/json",
+      Authorization: "bearer "+data.token
     } 
-    res.redirect("issue")
+    const info = await fetch(baseUrl,{
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(projectV2(data.user,data.project))
+    })
+    const infoJson = await info.json();
+    var fields = infoJson.data.user.projectV2.fields.nodes;
+    var statusNames;
+    for(var i=0;i<fields.length;i++){
+      if(fields[i].name === "Status"){
+        statusNames = fields[i].options
+      }
+    }
+    console.log(statusNames)
+    res.send(statusNames)
+
   }catch(e){
     console.log(e);
+    res.sendStatus(404);
   }
   
 })
@@ -279,6 +269,7 @@ router.get("/issue",async(req,res)=>{
 });
 
 router.get("/issue2",async(req,res)=>{
+  var data = req.body
   if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
     await initializeData();
   }
@@ -317,10 +308,6 @@ router.get("/issue2",async(req,res)=>{
           urlIssue = items[i].content.bodyUrl
         }
         labels = items[i].content.labels
-        // console.log(labels)
-        /* for(var k=0; k<items[i].content.labels.length; k++){
-          console.log("S")
-        } */
 
       }
 
@@ -330,36 +317,5 @@ router.get("/issue2",async(req,res)=>{
   }else{
   }
 });
-router.get("/lol",async(req,res)=>{
-  if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
-    await initializeData();
-  }
-
-  if(element.length==0){
-    try{
-      const info = await fetch(baseUrl,{
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(projectV2())
-      })
-      const infoJson = await info.json();
-      var fields = infoJson.data.user.projectV2.fields.nodes;
-      var statusNames;
-      for(var i=0;i<fields.length;i++){
-        if(fields[i].name === "Status"){
-          statusNames = fields[i].options
-        }
-      }
-      console.log(statusNames)
-    }catch(e){
-      console.log(e.message)
-    }
-  }else{
-  }
-});
-router.post("/issue",async (req,res)=>{
-  busqueda = req.body.filtroStatus;
-  res.render('issue',{busqueda,element})
-})
 
 module.exports = router;

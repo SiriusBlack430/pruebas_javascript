@@ -1,33 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require("./conection");
-const fetch = require('node-fetch');
 const bcrypt = require ('bcrypt');
 const saltRounds = 10;
-
-
-// variable para autenticar usuario y password
-var auth = function(req, res, next) {
-    console.log("Session"+ JSON.stringify(req.session))
-    if (req.session && req.session.permiss){
-        
-        return next();
-        
-    }else{
-        return res.sendStatus(401);
-    }
-};
-
-var authAdmin = function(req, res, next) {
-    console.log("Session"+ JSON.stringify(req.session))
-    if (req.session && req.session.permiss && req.session.permiss=='ADMIN'){
-        
-        return next();
-        
-    }else{
-        return res.sendStatus(401);
-    }
-};
 
 pool.getConnection((err)=>{
     if(err){
@@ -37,28 +12,9 @@ pool.getConnection((err)=>{
     console.log("DB connected");
     
 })
-// pagina para logear
-
-// pagina de index
-
-// pagina de contact
-router.get('/contact', auth, (req, res)=>{
-    if(req.session.permiss ==="ADMIN"){
-        res.render('contact', { title : "Contact pages for admins"});
-    }else{
-        res.render('contact', { title : "Contact pages for users"});
-    }
-    
-});
-
-router.get('/userList',async (req, res)=>{
-    var User = await pool.query("SELECT id,username,permiss FROM USER");
-    res.header("Access-Control-Allow-Origin","http://localhost:3000");
-    res.send({User});    
-});
 
 
-router.post('/registered', async (req, res)=>{
+router.post('/register', async (req, res)=>{
     var data = req.body;
     if(!data.username || !data.password || !data.confirmPassword){
         res.send('No puede haber campos vacios <a href="register">VOLVER</a>');
@@ -143,7 +99,7 @@ router.get('/userList/edit', async (req,res)=>{
     
 })
 //Modificar username y permisos
-router.post('/userList',authAdmin, async(req,res)=>{
+router.post('/userList', async(req,res)=>{
     const id = req.query.id;
     var data = req.body;i
     await pool.query("UPDATE USER Set username = ? ,permiss = ? WHERE id= ?", [data.username,data.privileges,id]);
