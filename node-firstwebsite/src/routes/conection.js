@@ -19,20 +19,45 @@ CREATE TABLE USER(
     id int(10) primary key auto_increment,
     username VARCHAR(50),
     password VARCHAR(200),
-    permiss VARCHAR(20)
+    permiss VARCHAR(20),
+    sessionid int(3),
+    constraint fk_session
+    foreign key (sessionid)
+        references SESSION(id)
+
 );
 INSERT INTO USER(username,password,permiss) 
 VALUES("amy","$2b$10$B3aozsB.Dw1gFitnm8k3EulfBXrGikAxFMVrYJxHFHR6CjbZanZ0a","ADMIN");
 
 DROP TABLE IF EXISTS REPCONFIG;
 CREATE TABLE REPCONFIG(
-    name VARCHAR(50) primary key,
+    id int(10) primary key auto_increment,
+    name VARCHAR(50),
     token VARCHAR(200),
-    projectName VARCHAR(50)
+    project int(2)
 );
-INSERT INTO REPCONFIG VALUES("SiriusBlack430","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","Prueba_issue")
+
+DROP TABLE IF EXISTS SESSION;
+CREATE TABLE SESSION(
+    id int(3) primary key auto_increment,
+    name VARCHAR(50),
+    creation_time DATE,
+    configid int(10),
+    constraint fk_config
+    foreign key (configid)
+        references REPCONFIG(id)
+);
+
+DROP TABLE IF EXISTS ISSUE;
+CREATE TABLE ISSUE(
+    id int(4) primary key,
+
+);
 
 */
+
+
+
 
 
  //amy password =  $2b$10$B3aozsB.Dw1gFitnm8k3EulfBXrGikAxFMVrYJxHFHR6CjbZanZ0a

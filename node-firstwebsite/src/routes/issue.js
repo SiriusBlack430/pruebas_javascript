@@ -1,19 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
-const { config } = require('./conection');
 const pool = require("./conection");
 
-var auth = function(req, res, next) {
-  console.log("Session"+ JSON.stringify(req.session))
-  if (req.session && req.session.permiss){
-    
-    return next();
-    
-  }else{
-    return res.sendStatus(401);
-  }
-};
 var github_data ={}, headers = {},element=[],cart={}, busqueda="";
 const baseUrl = "https://api.github.com/graphql"; // url api
 // query graphql
@@ -36,12 +25,12 @@ function idProject(username){
 
 //id project  PN_kwHOBQI_A84ACKFd
 
-function projectV2(){
+function projectV2(user,project){
   return{
     "query":`
     query{
-      user(login:"SiriusBlack430"){
-        projectV2(number:1){
+      user(login:"`+user+`"){
+        projectV2(number:`+project+`){
           fields(first:20){
             nodes{
               ... on ProjectV2SingleSelectField{
@@ -130,32 +119,33 @@ async function initializeData(){
   
 }
 
-router.get("/configRepos",async(req,res)=>{
-  var config = await pool.query("SELECT * from REPCONFIG");
-  if(config.length>0){
-    res.render("configRepos",{config:config[0]})
-  }else{
-    res.render("configRepos");
-  }
-})
-
 router.post("/configRepos",async (req,res)=>{
   var data = req.body;
-  var config = await pool.query("SELECT * from REPCONFIG");
   try{
-    if(config.length===0){
-      await pool.query("INSERT INTO REPCONFIG VALUES(?,?,?)",[data.repository,data.token,data.projectName]); 
-      await initializeData()     
-    }else{
-      if(config[0].name !== data.repository || config[0].token !== data.token || config[0].projectName !== data.projectName){   
-        await pool.query("UPDATE REPCONFIG SET name= ? , token = ? , projectName = ?",[data.repository,data.token,data.projectName]);
-        busqueda="",element=[]
-        await initializeData()
-      }
+    await pool.query("INSERT INTO REPCONFIG(name,token,project) VALUES(?,?,?)",[data.user,data.token,data.project]);
+    headers = {
+      "Content-Type":"application/json",
+      Authorization: "bearer "+data.token
     } 
-    res.redirect("issue")
+    const info = await fetch(baseUrl,{
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(projectV2(data.user,data.project))
+    })
+    const infoJson = await info.json();
+    var fields = infoJson.data.user.projectV2.fields.nodes;
+    var statusNames;
+    for(var i=0;i<fields.length;i++){
+      if(fields[i].name === "Status"){
+        statusNames = fields[i].options
+      }
+    }
+    console.log(statusNames)
+    res.send(statusNames)
+
   }catch(e){
     console.log(e);
+    res.sendStatus(404);
   }
   
 })
