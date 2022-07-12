@@ -10,9 +10,7 @@ const saltRounds = 10;
 var auth = function(req, res, next) {
     console.log("Session"+ JSON.stringify(req.session))
     if (req.session && req.session.permiss){
-        
         return next();
-        
     }else{
         return res.sendStatus(401);
     }
@@ -21,9 +19,7 @@ var auth = function(req, res, next) {
 var authAdmin = function(req, res, next) {
     console.log("Session"+ JSON.stringify(req.session))
     if (req.session && req.session.permiss && req.session.permiss=='ADMIN'){
-        
         return next();
-        
     }else{
         return res.sendStatus(401);
     }
@@ -35,7 +31,6 @@ pool.getConnection((err)=>{
         return;
     }
     console.log("DB connected");
-    
 })
 // pagina para logear
 
@@ -117,7 +112,6 @@ router.post('/loggedin', async function(req, res){
 router.get('/userList/delete', async (req,res)=>{
     const id = req.query.id;
     var User = await pool.query("SELECT permiss FROM USER WHERE id= ?",id);
-    console.log(User)
     if(User){
         if(User[0].permiss != "ADMIN"){
             await pool.query("DELETE FROM USER WHERE id= ?", id);

@@ -22,16 +22,6 @@ function generateAccessToken(username){
     }
     
 }
-/* router.get('/', (req, res)=>{
-    
-    res.render('index', { title : "First Website"});
-});
-router.get('/log',(req, res)=>{
-    req.session.destroy();
-
-    res.render('log',{title : "LOGIN" , notCorrect: false})
-
-}) */
 router.post('/log',async (req,res)=>{
     var data = req.body;
     console.log(req.body)
@@ -57,7 +47,6 @@ router.get('/userList',authenticateToken,async (req, res)=>{
     var User = await pool.query("SELECT id,username,permiss FROM USER");
     console.log(User.length)
     res.send({User});
-    
 });
 router.use(user);
 router.use(issue);
