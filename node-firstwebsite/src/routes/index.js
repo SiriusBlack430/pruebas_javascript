@@ -30,7 +30,6 @@ function authenticateToken(req,res,next){
 }
 router.post('/log',async (req,res)=>{
     var data = req.body;
-    console.log(req.body)
     const User = await pool.query("SELECT * FROM USER WHERE username= ?",data.username);
         
     if(User.length==0){
@@ -39,12 +38,15 @@ router.post('/log',async (req,res)=>{
         const compare = await bcrypt.compare(data.password,User[0].password);
         if(compare){          
             const token = generateAccessToken(data.username);
-            res.json(token);
+            const permiss = User[0].permiss;
+            var dataPost ={token, permiss}
+            res.send(dataPost)
         }else{
             res.status(404).send("contraseña erronea")
         }  
     }
 })
+
 router.post('/register', async (req, res)=>{
     var data = req.body;
     try{

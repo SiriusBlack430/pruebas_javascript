@@ -24,10 +24,8 @@ CREATE TABLE USER(
     constraint fk_session
     foreign key (sessionid)
         references SESSION(id)
-
 );
-INSERT INTO USER(username,password,permiss) 
-VALUES("amy","$2b$10$B3aozsB.Dw1gFitnm8k3EulfBXrGikAxFMVrYJxHFHR6CjbZanZ0a","ADMIN");
+INSERT INTO USER(username,password,permiss) VALUES("amy","$2b$10$B3aozsB.Dw1gFitnm8k3EulfBXrGikAxFMVrYJxHFHR6CjbZanZ0a","ADMIN");
 
 DROP TABLE IF EXISTS REPCONFIG;
 CREATE TABLE REPCONFIG(
@@ -51,7 +49,6 @@ CREATE TABLE SESSION(
 DROP TABLE IF EXISTS ISSUE;
 CREATE TABLE ISSUE(
     id int(4) primary key,
-
 );
 
 */

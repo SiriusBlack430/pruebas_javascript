@@ -2,9 +2,13 @@ const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
 const pool = require("./conection");
+var path = require('path');
+const uuid = require('uuid');
+var os = require('os');
+const fs = require('fs')
 
-var github_data ={}, headers = {},element=[],cart={}, busqueda="";
-const baseUrl = "https://api.github.com/graphql"; // url api
+var github_data ={},headers = {},cart={},element=[], elementFilter=[];
+  const baseUrl = "https://api.github.com/graphql"; // url api
 // query graphql
 // username SiriusBlack430
 function idProject(username){
@@ -22,8 +26,6 @@ function idProject(username){
     }`,
   };
 }
-
-//id project  PN_kwHOBQI_A84ACKFd
 
 function projectV2(user,project){
   return{
@@ -82,6 +84,53 @@ function projectV2(user,project){
     }`,
   };
 }
+
+function prueba(user,project){
+  return{
+    "query":`
+    query{
+      user(login:"`+user+`"){
+        projectV2(number:`+project+`){
+          fields(first:20){
+            nodes{
+              ... on ProjectV2SingleSelectField{
+                name
+                options{
+                  name
+                }
+              }
+            }
+          }
+          items(first:20){
+            nodes{
+              fieldValues(first: 8) {
+                nodes{
+                  ... on ProjectV2ItemFieldSingleSelectValue{
+                    name
+                  }
+                }
+              }
+              content{
+                  __typename
+                  ... on Issue{
+                  number
+                  title
+                  labels(first:20){
+                    nodes{
+                      name
+                    }
+                  }
+                  bodyUrl
+                }
+              }
+            }
+          }
+        }
+      }
+    }`,
+  };
+}
+
 async function initializeData(){
   //datos de config
   const data = await pool.query("SELECT * FROM REPCONFIG");
@@ -116,8 +165,96 @@ async function initializeData(){
   }catch(e){
     console.log(e.message) 
   }
-  
 }
+
+async function imprimir(element){
+  const file = uuid.v4()+'.csv'
+  var dir = path.join(os.tmpdir(),file)
+  var string="ID, Name Issues, Status, Label\n"
+  for(var i=0;i<element.length;i++){
+    string = string+element[i].id+', '+element[i].title+', '+element[i].status+', '+element[i].label+'\n'
+  }
+  fs.writeFileSync(dir, string,
+    {
+      encoding: "utf8",
+      mode: 0o666
+    },
+    (err) => {
+      if (err)
+        console.log(err);
+      else { console.log("File written successfully\n"); }
+    });
+    return dir
+}
+
+//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
+router.get("/prueba",async(req,res)=>{
+  element=[]
+  elementFilter=[]
+  try{
+    headers = {
+      "Content-Type":"application/json",
+      Authorization: "bearer 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"
+    }
+    const info = await fetch(baseUrl,{
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(prueba("SiriusBlack430",1))
+    })
+    const infoJson = await info.json();
+    var fields = infoJson.data.user.projectV2.fields.nodes;
+    var statusNames;
+    for(var i=0;i<fields.length;i++){
+      if(fields[i].name === "Status"){
+        statusNames = fields[i].options
+      }
+    }
+    var items = infoJson.data.user.projectV2.items.nodes;
+    for(var i=0; i<items.length; i++){
+      for(var j=0; j<items[i].fieldValues.nodes.length; j++){
+        for(var k=0; k<statusNames.length; k++){
+          if(statusNames[k].name === items[i].fieldValues.nodes[j].name){
+            cart.status = items[i].fieldValues.nodes[j].name
+          }
+        }
+      }
+      cart.label=""
+      if(items[i].content.__typename==="Issue"){
+        cart.id = items[i].content.number
+        cart.title = items[i].content.title
+        cart.url = items[i].content.bodyUrl
+        for(var l=0; l<items[i].content.labels.nodes.length; l++){
+            cart.label = items[i].content.labels.nodes[l].name+" "+cart.label
+        }
+        element.push({id: cart.id,title: cart.title,status: cart.status,url: cart.url,label: cart.label});
+      }
+    }
+    elementFilter=element
+    res.render("prueba",{elementFilter})
+  }catch(e){
+    console.log(e.message)
+  }
+})
+
+router.post("/prueba",async (req,res)=>{
+  var busqueda = req.body.filtroStatus, cont=0;
+  elementFilter=[]
+  if(busqueda.trim()=="") elementFilter=element
+  else {
+    for(var i=0;i<element.length;i++){
+      if(element[i].status.toLowerCase().trim() == busqueda.toLowerCase().trim()){
+        elementFilter[cont] = element[i]
+        cont++;
+      }
+    }
+  }  
+  res.render('prueba',{elementFilter,element})
+})
+
+router.post("/export", async(req,res)=>{
+  var download = await imprimir(elementFilter)
+  res.download(download)
+})
 
 router.post("/configRepos",async (req,res)=>{
   var data = req.body;
@@ -202,7 +339,7 @@ router.get("/issue",async(req,res)=>{
 
 router.post("/issue",async (req,res)=>{
   busqueda = req.body.filtroStatus;
-  res.render('issue',{busqueda,element})
+  res.render('issue',{busqueda,elementFilter})
 })
 
 module.exports = router;
