@@ -1,5 +1,4 @@
 const express = require("express");
-const session = require("express-session");// gestionar sessions
 const cookieParser = require("cookie-parser"); // cookies
 const path = require('path'); // modulo para path
 const morgan = require('morgan'); // mensajes de peticiones http
@@ -7,13 +6,6 @@ const app = express(); // servidor
 const cors = require('cors');
 app.use(cors())
 app.use(cookieParser());
-app.use( session({ // session para la app con sus atributos
-    secret: "SECRET",
-    saveUninitialized: false,
-    resave: true,
-    permiss: "user"
-}))
-
 
 app.use(express.json());
 app.set('port', 3001); // puerto en el que escucha
@@ -27,11 +19,8 @@ app.engine('html', require('ejs').renderFile); // archivos .html tratados como .
 app.use(morgan('dev'));
 app.use(express.urlencoded({extended: false}));
 
-
 // rutas
 app.use("/", require("./routes"));
-
-
 
 function startServer(){
   app.listen(app.get('port'), ()=>{
