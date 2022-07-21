@@ -194,7 +194,7 @@ router.get("/prueba",async(req,res)=>{
   try{
     headers = {
       "Content-Type":"application/json",
-      Authorization: "bearer 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"
+      Authorization: "bearer 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"
     }
     const info = await fetch(baseUrl,{
       method: "POST",
@@ -202,6 +202,7 @@ router.get("/prueba",async(req,res)=>{
       body: JSON.stringify(prueba("SiriusBlack430",1))
     })
     const infoJson = await info.json();
+    console.log(infoJson)
     var fields = infoJson.data.user.projectV2.fields.nodes;
     var statusNames;
     for(var i=0;i<fields.length;i++){
@@ -230,7 +231,7 @@ router.get("/prueba",async(req,res)=>{
       }
     }
     elementFilter=element
-    res.render("prueba",{elementFilter})
+    res.send({elementFilter})
   }catch(e){
     console.log(e.message)
   }
@@ -337,9 +338,71 @@ router.get("/issue",async(req,res)=>{
   }
 })
 
-router.post("/issue",async (req,res)=>{
-  busqueda = req.body.filtroStatus;
-  res.render('issue',{busqueda,elementFilter})
-})
+router.post("/issue",async(req,res)=>{
+  busqueda = req.body.status;
+  const data = await getIssue()
+  const filteredData = filterIssues(data,busqueda)
 
+  res.send(filteredData)
+})
+async function getIssue(){
+  element=[]
+  try{
+    headers = {
+      "Content-Type":"application/json",
+      Authorization: "bearer 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"
+    }
+    const info = await fetch(baseUrl,{
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(prueba("SiriusBlack430",1))
+    })
+    const infoJson = await info.json();
+    var fields = infoJson.data.user.projectV2.fields.nodes;
+    var statusNames;
+    for(var i=0;i<fields.length;i++){
+      if(fields[i].name === "Status"){
+        statusNames = fields[i].options
+      }
+    }
+    var items = infoJson.data.user.projectV2.items.nodes;
+    for(var i=0; i<items.length; i++){
+      for(var j=0; j<items[i].fieldValues.nodes.length; j++){
+        for(var k=0; k<statusNames.length; k++){
+          if(statusNames[k].name === items[i].fieldValues.nodes[j].name){
+            cart.status = items[i].fieldValues.nodes[j].name
+          }
+        }
+      }
+      cart.label=""
+      if(items[i].content.__typename==="Issue"){
+        cart.id = items[i].content.number
+        cart.title = items[i].content.title
+        cart.url = items[i].content.bodyUrl
+        for(var l=0; l<items[i].content.labels.nodes.length; l++){
+            cart.label = items[i].content.labels.nodes[l].name+" "+cart.label
+        }
+        element.push({id: cart.id,title: cart.title,status: cart.status,url: cart.url,label: cart.label});
+      }
+    }
+    return element
+  }catch(e){
+    console.log(e.message)
+  }
+}
+
+function filterIssues(data,filter){
+  cont=0;
+  elementFilter=[]
+  if(filter.trim()=="") elementFilter=data
+  else {
+    for(let i=0;i<element.length;i++){
+      if(data[i].status.toLowerCase().trim() == filter.toLowerCase().trim()){
+        elementFilter[cont] = data[i]
+        cont++;
+      }
+    }
+  }  
+  return elementFilter
+}
 module.exports = router;
