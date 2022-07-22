@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GET ISSUE </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body{
+            width: 60%;
+            margin: auto;
+        }
+        .todo{
+            margin-top: 3rem;
+        }
+        h1,.centro > table > thead > tr > th{
+            text-align: center;
+        }
+        button{
+            height: 2rem;
+            padding: 0.3rem;
+            background-color: rgb(39, 114, 226);
+            border-radius: .5rem;
+            cursor: pointer;
+            transition: all .09s linear;
+            color: #fff;
+            font-family: "Roboto",sans-serif;
+            font-size: 0.9rem;
+        }
+        button:hover{
+            background-color: #0b5ed7;
+        }
+        table{
+            margin-top: 2rem;
+            width: 100%;
+            border: 0.2rem solid;
+            border-color: #dee2e6;
+            text-align: left;
+        }
+        th, td{
+            padding: 0.40rem;
+            border: 0.2rem solid;
+            border-color: #dee2e6;
+        }
+        .medio{
+            display: flex;
+            /* justify-content: space-between; */
+        }
+        .medio > #derecha{
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="todo">
+        <h1>Issues</h1>
+        <div class="centro">
+            <div class="medio">
+                <form action="prueba" method="POST">
+                    <div class="data">
+                        <input type="search" name="filtroStatus" placeholder="Status Filter">
+                        <button>Busqueda</button>
+                    </div>
+                </form>
+                <form id="derecha" action="export" method="POST">
+                    <div class="data">
+                        <button>Exportar</button>
+                    </div>
+                </form>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name issues</th>
+                        <th>Status</th>
+                        <th>Label</th>            
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(elementFilter.length>0){
+                        for(var i=0;i<elementFilter.length;i++){ %>
+                            <tr>
+                                <td> <a href="<%= elementFilter[i].url %>" target="_blank">#<%= elementFilter[i].id %> </a></td>
+                                <td> <%= elementFilter[i].title %> </td>
+                                <td> <%= elementFilter[i].status %> </td>
+                                <td> <%= elementFilter[i].label %> </td>
+                            </tr>
+                            <% } %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </body>
+        </html>

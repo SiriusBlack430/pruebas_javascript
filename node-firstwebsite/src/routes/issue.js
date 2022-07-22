@@ -5,7 +5,8 @@ const pool = require("./conection");
 var path = require('path');
 const uuid = require('uuid');
 var os = require('os');
-const fs = require('fs')
+const fs = require('fs');
+const { token } = require('morgan');
 
 var github_data ={},headers = {},cart={},element=[], elementFilter=[];
   const baseUrl = "https://api.github.com/graphql"; // url api
@@ -260,7 +261,6 @@ router.post("/export", async(req,res)=>{
 router.post("/configRepos",async (req,res)=>{
   var data = req.body;
   try{
-    await pool.query("INSERT INTO REPCONFIG(name,token,project) VALUES(?,?,?)",[data.user,data.token,data.project]);
     headers = {
       "Content-Type":"application/json",
       Authorization: "bearer "+data.token
@@ -272,23 +272,16 @@ router.post("/configRepos",async (req,res)=>{
     })
     const infoJson = await info.json();
     var fields = infoJson.data.user.projectV2.fields.nodes;
-    var statusNames;
-    for(var i=0;i<fields.length;i++){
-      if(fields[i].name === "Status"){
-        statusNames = fields[i].options
-      }
+    if(fields.length>0){
+      //await pool.query("INSERT INTO REPCONFIG(name,token,project) VALUES(?,?,?)",[data.user,data.token,data.project]);
+      res.sendStatus(200);
     }
-    console.log(statusNames)
-    res.send(statusNames)
-
   }catch(e){
     console.log(e);
     res.sendStatus(404);
   }
-  
 })
 
-//ghp_nUxhCggtwoD0um      +   rdPTyVLGsDNI8dza3AOu3B
 router.get("/issue",async(req,res)=>{
   if(github_data.projectId === undefined || github_data.token === undefined || github_data.username === undefined ){
     await initializeData();
@@ -342,15 +335,17 @@ router.post("/issue",async(req,res)=>{
   busqueda = req.body.status;
   const data = await getIssue()
   const filteredData = filterIssues(data,busqueda)
-
   res.send(filteredData)
 })
+
+//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
 async function getIssue(){
   element=[]
+  var token = "ghp_LPbF6UYiTtK6Bn7h" + "DShEKMm9PCDUaT3xFEeo"
   try{
     headers = {
       "Content-Type":"application/json",
-      Authorization: "bearer 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"
+      Authorization: `bearer ${token}`
     }
     const info = await fetch(baseUrl,{
       method: "POST",
